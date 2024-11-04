@@ -1,16 +1,10 @@
-FROM ubuntu:latest AS build
-
-RUN apt-get update
-RUN apt-get install -y openjdk-17-jdk -y
+FROM maven:3.8.3-openjdk-17 AS build
+WORKDIR /app
 COPY . .
-
-RUN apt-get install -y maven -y
 RUN mvn clean package -X -DskipTests
 
 FROM openjdk:17-jdk-slim
-
-EXPOSE 8080
-
+WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
