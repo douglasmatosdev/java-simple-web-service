@@ -1,10 +1,16 @@
-FROM maven:3.8.3-openjdk-17 as build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -X -DskipTests
+FROM ubuntu:latest as build
 
-FROM openjdk:17-jdk-alpine
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+RUN apt-get update
+RUN apt-get install -y openjdk-11-jdk -y
+COPY . .
+
+RUN apt-get install -y maven -y
+RUN mvn clean install
+
+FROM openjdk:17-jdk-slim
+
 EXPOSE 8080
+
+COPY --from=build /app/target/*.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
